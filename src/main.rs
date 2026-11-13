@@ -36,6 +36,7 @@ struct View {
 
 fn main() -> Result<()> {
     let ui = AppWindow::new()?;
+    ui.set_version(env!("CARGO_PKG_VERSION").into());
     let root = ProjectDirs::from("", "", "Elearnin")
         .context("Could not locate your application data directory")?
         .data_local_dir()

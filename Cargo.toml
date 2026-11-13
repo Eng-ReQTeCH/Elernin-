@@ -26,3 +26,4 @@ keyring = { version = "3", features = ["sync-secret-service", "crypto-rust", "ve
 
 [build-dependencies]
 slint-build = "~1.18.0"
+winresource = "0.1.31"

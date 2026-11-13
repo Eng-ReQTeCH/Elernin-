@@ -18,6 +18,32 @@ Elearnin’ syncs on launch and every 15 minutes while it’s open. It uses Mood
 
 Each device has its own offline copy. The first version syncs downloadable course files. External streams and activities such as quizzes or submissions are handled through the university portal. Android packaging, credential storage, and the Android file viewer handoff are future work.
 
+## Windows installer
+
+The x64 installer runs on Windows 10 and 11. It installs for the current user, adds a Start menu shortcut, and offers an optional desktop shortcut. Uninstall through **Settings → Apps → Installed apps**. Your offline library and saved sign-in remain available for a reinstall. Use **Forget sign-in** in Elearnin’ to remove the stored credentials.
+
+To build the installer, install Inno Setup 6.3 or newer and run this command in PowerShell from the project folder. Pass the full path to `ISCC.exe` if it is outside your PATH.
+
+```powershell
+.\packaging\windows\build-installer.ps1 -InnoCompiler 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+```
+
+The installer and its SHA-256 checksum go into `target/installer`.
+
+## Install on Linux
+
+Install the package for your distribution, then open **Elearnin’** from the applications menu. The packages target x86-64 computers. The Debian package is built on Debian 12 for use on Debian 12 or newer and compatible Mint versions.
+
+```sh
+# Debian / Linux Mint
+sudo apt install ./elearnin_1.0.0_amd64.deb
+
+# Arch Linux
+sudo pacman -U ./elearnin-1.0.0-1-x86_64.pkg.tar.zst
+```
+
+Automatic sign-in uses the desktop's Secret Service keyring. GNOME Keyring and KeePassXC with Secret Service enabled are supported options. Package removal leaves your downloads and saved sign-in in your user account.
+
 ## Verify locally
 
 ```sh

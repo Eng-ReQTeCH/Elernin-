@@ -1,0 +1,82 @@
+name: Linux packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [linux-packaging]
+    paths:
+      - '.github/workflows/linux-packages.yml'
+      - 'packaging/linux/**'
+      - 'Cargo.*'
+      - 'src/**'
+      - 'ui/**'
+
+permissions:
+  contents: read
+
+jobs:
+  debian:
+    runs-on: ubuntu-24.04
+    container: debian:12
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends build-essential ca-certificates curl git pkg-config libdbus-1-dev libfontconfig1-dev libxkbcommon-dev libwayland-dev libx11-xcb1 libx11-dev libxcb1-dev dpkg-dev python3 desktop-file-utils
+      - uses: actions/checkout@v4
+      - name: Build and test Debian package
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
+          source "$HOME/.cargo/env"
+          cargo test --release --locked --target x86_64-unknown-linux-gnu
+          bash packaging/linux/build-deb.sh
+          apt-get install -y ./target/installer/elearnin_*_amd64.deb
+          test -x /usr/bin/elearnin
+          ldd /usr/bin/elearnin | tee /tmp/elearnin-libraries
+          ! grep -q 'not found' /tmp/elearnin-libraries
+          apt-get remove -y elearnin
+          test ! -e /usr/bin/elearnin
+          cd target/installer
+          sha256sum *.deb > SHA256SUMS-debian.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elearnin-debian-mint-x64
+          path: |
+            target/installer/*.deb
+            target/installer/SHA256SUMS-debian.txt
+          if-no-files-found: error
+  arch:
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    steps:
+      - name: Install build dependencies
+        run: pacman -Syu --noconfirm --needed git cargo pkgconf dbus fontconfig libx11 libxcb libxkbcommon libxkbcommon-x11 wayland desktop-file-utils
+      - uses: actions/checkout@v4
+      - name: Build and test Arch package
+        shell: bash
+        run: |
+          useradd --create-home builder
+          build_home=/home/builder/elearnin
+          install -d -o builder -g builder "$build_home" "$build_home/source" "$build_home/package"
+          tar --exclude=.git --exclude=target -cf - . | tar -xf - -C "$build_home/source"
+          cp packaging/linux/arch/PKGBUILD "$build_home/package/PKGBUILD"
+          chown -R builder:builder "$build_home"
+          (cd "$build_home/package" && runuser -u builder -- env ELEARNIN_SOURCE="$build_home/source" makepkg --nodeps --noconfirm)
+          mkdir -p target/installer
+          cp "$build_home/package/"*.pkg.tar.zst target/installer/
+          pacman -U --noconfirm target/installer/elearnin-*-x86_64.pkg.tar.zst
+          test -x /usr/bin/elearnin
+          ldd /usr/bin/elearnin | tee /tmp/elearnin-libraries
+          ! grep -q 'not found' /tmp/elearnin-libraries
+          pacman -R --noconfirm elearnin
+          test ! -e /usr/bin/elearnin
+          cd target/installer
+          sha256sum *.pkg.tar.zst > SHA256SUMS-arch.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elearnin-arch-x64
+          path: |
+            target/installer/elearnin-*-x86_64.pkg.tar.zst
+            target/installer/SHA256SUMS-arch.txt
+          if-no-files-found: error

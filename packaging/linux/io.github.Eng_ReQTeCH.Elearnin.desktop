@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Elearnin’
+Comment=Browse and open saved BUE course materials
+Exec=elearnin
+Icon=io.github.Eng_ReQTeCH.Elearnin
+Terminal=false
+Categories=Education;
+Keywords=BUE;Moodle;Courses;

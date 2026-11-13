@@ -1,0 +1,22 @@
+pkgname=elearnin
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Offline course library for BUE Learn1'
+arch=('x86_64')
+url='https://github.com/Eng-ReQTeCH/Elernin-'
+license=('LicenseRef-Elearnin')
+depends=('glibc' 'gcc-libs' 'dbus' 'fontconfig' 'libx11' 'libxcb' 'libxkbcommon' 'libxkbcommon-x11' 'wayland' 'ca-certificates' 'xdg-utils')
+makedepends=('cargo' 'pkgconf' 'desktop-file-utils')
+optdepends=('gnome-keyring: save credentials with Secret Service'
+            'keepassxc: alternate Secret Service provider when enabled')
+
+build() {
+    cd "${ELEARNIN_SOURCE:?Set ELEARNIN_SOURCE to the Elearnin source checkout}"
+    cargo build --release --locked --target-dir "$srcdir/target"
+}
+
+package() {
+    cd "${ELEARNIN_SOURCE:?Set ELEARNIN_SOURCE to the Elearnin source checkout}"
+    bash packaging/linux/install-files.sh "$srcdir/target/release/elearnin" "$pkgdir"
+    desktop-file-validate "$pkgdir/usr/share/applications/"*.desktop
+}
