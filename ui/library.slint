@@ -1,0 +1,420 @@
+import { Button, LineEdit, ListView, Palette, ScrollView } from "std-widgets.slint";
+
+global Theme {
+    in-out property <bool> dark;
+    out property <color> canvas: dark ? #111522 : #f3f5fb;
+    out property <color> surface: dark ? #1b2234 : #ffffff;
+    out property <color> panel: dark ? #151c2b : #e9edf7;
+    out property <color> line: dark ? #303b56 : #e0e5ef;
+    out property <color> text: dark ? #f0f3ff : #17213e;
+    out property <color> muted: dark ? #aab6d2 : #566482;
+    out property <color> accent: dark ? #a9b6ff : #394bb0;
+    out property <color> badge: dark ? #28365d : #e6eaff;
+    out property <color> hover: dark ? #263450 : #eef0ff;
+    out property <color> focus: dark ? #a2aaff : #4c5ce5;
+}
+
+export struct LibraryRow {
+    title: string,
+    detail: string,
+    kind: string,
+    group: string,
+    file-index: int,
+}
+
+component StudyRow inherits Rectangle {
+    in property <LibraryRow> item;
+    callback picked;
+    height: 65px + (root.item.group != "" ? 39px : 0px);
+    VerticalLayout {
+        if root.item.group != "": Text {
+            height: 39px;
+            text: root.item.group;
+            color: Theme.accent;
+            font-size: 15px;
+            font-weight: 750;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+        Rectangle {
+            height: 59px;
+            border-radius: 12px;
+            border-width: 1px;
+            border-color: focus-area.has-focus ? Theme.focus : Theme.line;
+            background: hit.has-hover ? Theme.hover : Theme.surface;
+            accessible-role: button;
+            accessible-label: root.item.title;
+            accessible-description: root.item.detail;
+            accessible-action-default => { root.picked(); }
+            HorizontalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                spacing: 7px;
+                alignment: stretch;
+                Rectangle {
+                    width: 34px;
+                    height: 35px;
+                    y: (parent.height - self.height) / 2;
+                    border-radius: 8px;
+                    background: Theme.badge;
+                    Text {
+                        text: root.item.kind;
+                        font-size: 10px;
+                        font-weight: 750;
+                        color: Theme.accent;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+                VerticalLayout {
+                    horizontal-stretch: 1;
+                    alignment: center;
+                    spacing: 3px;
+                    Text { text: root.item.title; color: Theme.text; font-size: 15px; font-weight: 650; overflow: elide; }
+                    Text { text: root.item.detail; color: Theme.muted; font-size: 12px; overflow: elide; }
+                }
+                Text { text: "↗"; width: 16px; color: Theme.accent; font-size: 19px; vertical-alignment: center; }
+            }
+            hit := TouchArea {
+                mouse-cursor: pointer;
+                clicked => { root.picked(); }
+            }
+            focus-area := FocusScope {
+                key-pressed(event) => {
+                    if event.text == Key.Return || event.text == Key.Space {
+                        root.picked();
+                        return accept;
+                    }
+                    return reject;
+                }
+            }
+        }
+        Rectangle { height: 6px; }
+    }
+}
+
+component ModuleTile inherits Rectangle {
+    in property <LibraryRow> item;
+    callback picked;
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: keys.has-focus || hit.has-hover ? Theme.focus : Theme.line;
+    background: hit.has-hover ? Theme.hover : Theme.surface;
+    accessible-role: button;
+    accessible-label: root.item.title;
+    accessible-description: root.item.detail;
+    accessible-action-default => { root.picked(); }
+    VerticalLayout {
+        padding: 15px;
+        spacing: 9px;
+        HorizontalLayout {
+            height: 33px;
+            Rectangle {
+                width: 34px;
+                border-radius: 9px;
+                background: Theme.badge;
+                Text { text: "▤"; color: Theme.accent; font-size: 19px; horizontal-alignment: center; vertical-alignment: center; }
+            }
+            Rectangle { horizontal-stretch: 1; }
+            Text { text: "›"; color: Theme.accent; font-size: 23px; vertical-alignment: center; }
+        }
+        Text {
+            text: root.item.title;
+            color: Theme.text;
+            font-size: 16px;
+            font-weight: 700;
+            wrap: word-wrap;
+            overflow: elide;
+            vertical-stretch: 1;
+        }
+        Text { text: root.item.detail; color: Theme.muted; font-size: 12px; overflow: elide; }
+    }
+    keys := FocusScope {
+        key-pressed(event) => {
+            if event.text == Key.Return || event.text == Key.Space {
+                root.picked();
+                return accept;
+            }
+            return reject;
+        }
+    }
+    hit := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { keys.focus(); root.picked(); }
+    }
+}
+
+component MaterialColumn inherits Rectangle {
+    in property <string> title;
+    in property <[LibraryRow]> files;
+    callback open-file(int);
+    min-width: 134px;
+    horizontal-stretch: 1;
+    background: Theme.panel;
+    border-radius: 12px;
+    VerticalLayout {
+        padding: 8px;
+        spacing: 4px;
+        Text {
+            height: 33px;
+            text: root.title;
+            color: Theme.text;
+            font-size: 15px;
+            font-weight: 750;
+            vertical-alignment: center;
+        }
+        if root.files.length == 0: Text {
+            vertical-stretch: 1;
+            text: "No files yet";
+            color: Theme.muted;
+            font-size: 12px;
+            vertical-alignment: top;
+        }
+        if root.files.length > 0: ListView {
+            vertical-stretch: 1;
+            horizontal-scrollbar-policy: always-off;
+            for item in root.files: StudyRow {
+                item: item;
+                picked => { root.open-file(item.file-index); }
+            }
+        }
+    }
+}
+
+component HeaderAction inherits Rectangle {
+    in property <string> label;
+    in property <string> symbol;
+    in property <bool> selected;
+    callback activated;
+
+    min-width: root.symbol == "" ? 86px : 36px;
+    preferred-width: self.min-width;
+    height: 36px;
+    border-radius: 8px;
+    border-width: keys.has-focus ? 1px : 0px;
+    border-color: Theme.focus;
+    background: root.selected ? Theme.badge : (hit.has-hover ? Theme.hover : transparent);
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-action-default => { root.activated(); }
+
+    Text {
+        text: root.symbol == "" ? root.label : root.symbol;
+        color: root.selected ? Theme.accent : (hit.has-hover ? Theme.text : Theme.muted);
+        font-size: root.symbol == "" ? 13px : 19px;
+        font-weight: root.selected ? 700 : 550;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    keys := FocusScope {
+        key-pressed(event) => {
+            if event.text == Key.Return || event.text == Key.Space {
+                root.activated();
+                return accept;
+            }
+            return reject;
+        }
+    }
+    hit := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { keys.focus(); root.activated(); }
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "Elearnin’";
+    min-width: 490px;
+    min-height: 440px;
+    preferred-width: 920px;
+    preferred-height: 720px;
+    background: Theme.canvas;
+    in-out property <bool> dark-mode <=> Theme.dark;
+    changed dark-mode => { Palette.color-scheme = root.dark-mode ? ColorScheme.dark : ColorScheme.light; }
+    init => { Palette.color-scheme = root.dark-mode ? ColorScheme.dark : ColorScheme.light; }
+    in-out property <string> page: "modules";
+    in property <string> heading: "Modules";
+    in property <string> summary;
+    in property <string> status: "Opening your library…";
+    in property <string> last-sync;
+    in property <bool> busy;
+    in property <bool> connected;
+    in property <[LibraryRow]> rows;
+    in property <[LibraryRow]> lectures;
+    in property <[LibraryRow]> tutorials;
+    in property <[LibraryRow]> other;
+    callback choose(int);
+    callback refresh;
+    callback connect(string, string);
+    callback disconnect;
+    callback home;
+    callback read-sync-status;
+    callback toggle-theme;
+
+    VerticalLayout {
+        HorizontalLayout {
+            height: 54px;
+            padding-left: 22px;
+            padding-right: 22px;
+            spacing: 6px;
+            Text {
+                text: "Elearnin’";
+                color: Theme.text;
+                font-size: 18px;
+                font-weight: 800;
+                vertical-alignment: center;
+            }
+            Rectangle { width: 12px; }
+            HeaderAction {
+                label: root.page == "course" ? "‹ Modules" : "Modules";
+                selected: root.page == "modules";
+                y: (parent.height - self.height) / 2;
+                activated => { if root.page != "modules" { root.home(); } }
+            }
+            HeaderAction {
+                label: "Settings";
+                selected: root.page == "settings";
+                y: (parent.height - self.height) / 2;
+                activated => { root.page = "settings"; }
+            }
+            Rectangle { horizontal-stretch: 1; }
+            HeaderAction {
+                label: root.dark-mode ? "Switch to light mode" : "Switch to dark mode";
+                symbol: root.dark-mode ? "☀" : "☾";
+                y: (parent.height - self.height) / 2;
+                activated => { root.toggle-theme(); }
+            }
+        }
+        Rectangle { height: 1px; background: Theme.line; }
+
+        if root.page == "settings": VerticalLayout {
+            padding: 22px;
+            spacing: 12px;
+            vertical-stretch: 1;
+            Text { text: "BUE Learn1"; font-size: 28px; font-weight: 750; color: Theme.text; }
+            Text {
+                text: "Save your BUE sign-in to sync automatically. Your device’s credential store keeps it secure.";
+                color: Theme.muted;
+                wrap: word-wrap;
+            }
+            username := LineEdit { placeholder-text: "BUE username"; enabled: !root.busy; }
+            password := LineEdit { placeholder-text: "BUE password"; input-type: InputType.password; enabled: !root.busy; }
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
+                Button {
+                    text: "Save and sync";
+                    primary: true;
+                    enabled: !root.busy && username.text != "" && password.text != "";
+                    clicked => { root.connect(username.text, password.text); password.text = ""; }
+                }
+                if root.connected: Button { text: "Forget sign-in"; enabled: !root.busy; clicked => { root.disconnect(); } }
+            }
+            Rectangle { vertical-stretch: 1; }
+        }
+
+        if root.page != "settings": VerticalLayout {
+            padding: 22px;
+            spacing: 14px;
+            vertical-stretch: 1;
+            Rectangle {
+                min-height: 112px;
+                vertical-stretch: 0;
+                border-radius: 16px;
+                background: root.dark-mode ? @linear-gradient(110deg, #202a48, #2a3767) : @linear-gradient(110deg, #1e2c59, #3548ae);
+                HorizontalLayout {
+                    padding: 17px;
+                    spacing: 12px;
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 4px;
+                        alignment: center;
+                        Text {
+                            text: root.page == "modules" ? "Your modules" : root.heading;
+                            color: white;
+                            font-size: 26px;
+                            font-weight: 750;
+                            overflow: elide;
+                        }
+                        Text { text: root.summary; color: #e0e6ff; font-size: 13px; }
+                    }
+                    if root.connected: VerticalLayout {
+                        alignment: center;
+                        Button { text: root.busy ? "Syncing…" : "Sync now"; enabled: !root.busy; clicked => { root.refresh(); } }
+                    }
+                }
+            }
+            if root.page == "modules" && root.rows.length == 0: Rectangle {
+                vertical-stretch: 1;
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.line;
+                border-radius: 12px;
+                VerticalLayout {
+                    padding: 18px;
+                    alignment: center;
+                    spacing: 12px;
+                    Text {
+                        text: root.connected ? "Your modules will appear after sync." : "Connect BUE Learn1 to download your modules.";
+                        color: Theme.muted;
+                        wrap: word-wrap;
+                        horizontal-alignment: center;
+                    }
+                    if !root.connected: HorizontalLayout {
+                        alignment: center;
+                        Button { text: "Connect BUE"; primary: true; clicked => { root.page = "settings"; } }
+                    }
+                }
+            }
+            if root.page == "modules" && root.rows.length > 0: grid := ScrollView {
+                vertical-stretch: 1;
+                horizontal-scrollbar-policy: always-off;
+                property <length> gap: 12px;
+                property <length> available-width: self.width - 12px;
+                property <int> columns: max(1, floor((self.available-width + self.gap) / 167px));
+                property <length> tile-size: (self.available-width - (self.columns - 1) * self.gap) / self.columns;
+                content-width: self.available-width;
+                content-height: ceil(root.rows.length / (self.columns * 1.0)) * (self.tile-size + self.gap) - self.gap;
+                for item[index] in root.rows: ModuleTile {
+                    item: item;
+                    width: grid.tile-size;
+                    height: self.width;
+                    x: mod(index, grid.columns) * (grid.tile-size + grid.gap);
+                    y: floor(index / (grid.columns * 1.0)) * (grid.tile-size + grid.gap);
+                    picked => { root.choose(index); }
+                }
+            }
+            if root.page == "course": HorizontalLayout {
+                spacing: 10px;
+                vertical-stretch: 1;
+                MaterialColumn {
+                    title: "Lectures";
+                    files: root.lectures;
+                    open-file(index) => { root.choose(index); }
+                }
+                MaterialColumn {
+                    title: "Tutorials";
+                    files: root.tutorials;
+                    open-file(index) => { root.choose(index); }
+                }
+                MaterialColumn {
+                    title: "Everything else";
+                    files: root.other;
+                    open-file(index) => { root.choose(index); }
+                }
+            }
+        }
+        Rectangle { height: 1px; background: Theme.line; }
+        Rectangle {
+            background: Theme.surface;
+            VerticalLayout {
+                padding-left: 22px;
+                padding-right: 22px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                spacing: 4px;
+                Text { text: root.status; color: Theme.text; font-size: 13px; wrap: word-wrap; }
+                if root.last-sync != "": Text { text: root.last-sync; color: Theme.muted; font-size: 12px; }
+            }
+        }
+    }
+}
