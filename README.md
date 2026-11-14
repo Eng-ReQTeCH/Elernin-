@@ -16,7 +16,11 @@ On the first launch, click **Connect BUE**, enter your Learn1 username and passw
 
 Elearnin’ syncs on launch and every 15 minutes while it’s open. It uses Moodle’s mobile API when available and can fall back to the ordinary Learn1 login and course pages. If the session expires, it signs in again with the saved credentials. If the university rejects the credentials or requires an interactive check, the sync status explains what happened.
 
-Each device has its own offline copy. The first version syncs downloadable course files. External streams and activities such as quizzes or submissions are handled through the university portal. Android packaging, credential storage, and the Android file viewer handoff are future work.
+Each device has its own offline copy. The app syncs downloadable course files. External streams and activities such as quizzes or submissions are handled through the university portal.
+
+## Install on Android
+
+Download the signed APK from [GitHub Releases](https://github.com/Eng-ReQTeCH/Elernin-/releases), open it on your phone, and follow Android’s installation prompt. The package supports Android 8.0 or later on ARM64 and x86-64. Android Keystore protects saved sign-in, and study files open using an installed viewer for their file type.
 
 ## Windows installer
 

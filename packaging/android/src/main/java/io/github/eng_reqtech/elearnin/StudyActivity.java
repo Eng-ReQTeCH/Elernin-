@@ -91,8 +91,8 @@ public final class StudyActivity extends NativeActivity {
             name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT));
         Intent intent = new Intent(Intent.ACTION_VIEW)
             .setDataAndType(uri, mime == null ? "application/octet-stream" : mime)
-            .setClipData(ClipData.newRawUri("Study material", uri))
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setClipData(ClipData.newRawUri("Study material", uri));
         runOnUiThread(() -> {
             try {
                 startActivity(intent);
