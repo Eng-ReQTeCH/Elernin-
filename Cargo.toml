@@ -22,7 +22,7 @@ keyring = { version = "3", features = ["windows-native"] }
 open = { version = "5", features = ["shellexecute-on-windows"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-keyring = { version = "3", features = ["sync-secret-service", "crypto-rust", "vendored"] }
+keyring = { version = "3", features = ["sync-secret-service", "crypto-rust"] }
 
 [build-dependencies]
 slint-build = "~1.18.0"

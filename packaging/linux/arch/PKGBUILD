@@ -7,6 +7,7 @@ url='https://github.com/Eng-ReQTeCH/Elernin-'
 license=('LicenseRef-Elearnin')
 depends=('glibc' 'gcc-libs' 'dbus' 'fontconfig' 'libx11' 'libxcb' 'libxkbcommon' 'libxkbcommon-x11' 'wayland' 'ca-certificates' 'xdg-utils')
 makedepends=('cargo' 'pkgconf' 'desktop-file-utils')
+options=('!lto')
 optdepends=('gnome-keyring: save credentials with Secret Service'
             'keepassxc: alternate Secret Service provider when enabled')
 
