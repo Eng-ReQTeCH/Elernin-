@@ -223,8 +223,8 @@ component HeaderAction inherits Rectangle {
 
 export component AppWindow inherits Window {
     title: "Elearnin’";
-    min-width: 490px;
-    min-height: 440px;
+    min-width: root.mobile ? 310px : 490px;
+    min-height: root.mobile ? 340px : 440px;
     preferred-width: 920px;
     preferred-height: 720px;
     background: Theme.canvas;
@@ -234,6 +234,9 @@ export component AppWindow inherits Window {
     in-out property <string> page: "modules";
     in property <string> heading: "Modules";
     in property <string> version;
+    in property <bool> mobile;
+    private property <int> mobile-column: 0;
+    changed page => { if root.page == "course" { root.mobile-column = 0; } }
     in property <string> summary;
     in property <string> status: "Opening your library…";
     in property <string> last-sync;
@@ -258,13 +261,13 @@ export component AppWindow inherits Window {
             padding-right: 22px;
             spacing: 6px;
             Text {
-                text: "Elearnin’";
+                text: root.mobile ? "" : "Elearnin’";
                 color: Theme.text;
                 font-size: 18px;
                 font-weight: 800;
                 vertical-alignment: center;
             }
-            Rectangle { width: 12px; }
+            if !root.mobile: Rectangle { width: 12px; }
             HeaderAction {
                 label: root.page == "course" ? "‹ Modules" : "Modules";
                 selected: root.page == "modules";
@@ -399,7 +402,21 @@ export component AppWindow inherits Window {
                     picked => { root.choose(index); }
                 }
             }
-            if root.page == "course": HorizontalLayout {
+            if root.page == "course" && root.mobile: VerticalLayout {
+                spacing: 6px;
+                HorizontalLayout {
+                    spacing: 4px;
+                    Button { text: "Lectures"; primary: root.mobile-column == 0; clicked => { root.mobile-column = 0; } }
+                    Button { text: "Tutorials"; primary: root.mobile-column == 1; clicked => { root.mobile-column = 1; } }
+                    Button { text: "Other"; primary: root.mobile-column == 2; clicked => { root.mobile-column = 2; } }
+                }
+                MaterialColumn {
+                    title: root.mobile-column == 0 ? "Lectures" : (root.mobile-column == 1 ? "Tutorials" : "Everything else");
+                    files: root.mobile-column == 0 ? root.lectures : (root.mobile-column == 1 ? root.tutorials : root.other);
+                    open-file(index) => { root.choose(index); }
+                }
+            }
+            if root.page == "course" && !root.mobile: HorizontalLayout {
                 spacing: 10px;
                 vertical-stretch: 1;
                 MaterialColumn {

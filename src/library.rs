@@ -328,7 +328,7 @@ mod tests {
         material.revision = Some("2".into());
         library.save_material(7, &material, |output| {
             output.write_all(b"ne")?;
-            crate::open_saved(root.path(), 7, &displayed, |path| {
+            crate::app::open_saved(root.path(), 7, &displayed, |path| {
                 assert_eq!(fs::read(path)?, b"old!");
                 Ok(())
             })?;
@@ -336,7 +336,7 @@ mod tests {
             Ok(None)
         })?;
         assert!(!displayed.path.exists());
-        crate::open_saved(root.path(), 7, &displayed, |path| {
+        crate::app::open_saved(root.path(), 7, &displayed, |path| {
             assert_eq!(fs::read(path)?, b"new!");
             Ok(())
         })

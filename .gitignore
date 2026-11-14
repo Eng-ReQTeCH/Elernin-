@@ -8,3 +8,9 @@
 *.pem
 *.key
 *.exe
+/packaging/android/.gradle/
+/packaging/android/build/
+*.jks
+*.keystore
+*.p12
+*.apk
