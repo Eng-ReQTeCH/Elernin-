@@ -17,8 +17,10 @@ scraper = "0.24"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
-slint = { version = "~1.18.0", default-features = false, features = ["std", "backend-winit", "renderer-software", "compat-1-2", "accessibility", "unstable-winit-030"] }
 tempfile = "3"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+slint = { version = "~1.18.0", default-features = false, features = ["std", "backend-winit", "renderer-software", "compat-1-2", "accessibility", "unstable-winit-030"] }
 
 [target.'cfg(windows)'.dependencies]
 keyring = { version = "3", features = ["windows-native"] }
@@ -33,4 +35,4 @@ winresource = "0.1.31"
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21.1"
-slint = { version = "~1.18.0", default-features = false, features = ["backend-android-activity-06"] }
+slint = { version = "~1.18.0", default-features = false, features = ["std", "compat-1-2", "backend-android-activity-06"] }
