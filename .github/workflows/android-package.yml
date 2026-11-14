@@ -30,6 +30,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: android-ndk-r28
+      - uses: android-actions/setup-android@v3
       - name: Install Android toolchain
         run: |
           sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;28.2.13676358'
