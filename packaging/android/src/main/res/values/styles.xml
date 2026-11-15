@@ -1,9 +1,8 @@
 <resources>
-    <style name="Theme.Elearnin.Base" parent="android:style/Theme.Material.NoActionBar">
+    <style name="Theme.Elearnin" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:statusBarColor">#111522</item>
         <item name="android:navigationBarColor">#111522</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
     </style>
-    <style name="Theme.Elearnin" parent="Theme.Elearnin.Base" />
 </resources>

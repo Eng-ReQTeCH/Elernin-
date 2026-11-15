@@ -227,7 +227,7 @@ export component AppWindow inherits Window {
     min-height: root.mobile ? 340px : 440px;
     preferred-width: 920px;
     preferred-height: 720px;
-    background: Theme.canvas;
+    background: root.mobile ? #111522 : Theme.canvas;
     in-out property <bool> dark-mode <=> Theme.dark;
     changed dark-mode => { Palette.color-scheme = root.dark-mode ? ColorScheme.dark : ColorScheme.light; }
     init => { Palette.color-scheme = root.dark-mode ? ColorScheme.dark : ColorScheme.light; }
@@ -254,7 +254,18 @@ export component AppWindow inherits Window {
     callback read-sync-status;
     callback toggle-theme;
 
+    if root.mobile: Rectangle {
+        x: root.safe-area-insets.left;
+        y: root.safe-area-insets.top;
+        width: root.width - self.x - root.safe-area-insets.right;
+        height: root.height - self.y - root.safe-area-insets.bottom;
+        background: Theme.canvas;
+    }
     VerticalLayout {
+        padding-top: root.mobile ? root.safe-area-insets.top : 0px;
+        padding-bottom: root.mobile ? root.safe-area-insets.bottom : 0px;
+        padding-left: root.mobile ? root.safe-area-insets.left : 0px;
+        padding-right: root.mobile ? root.safe-area-insets.right : 0px;
         HorizontalLayout {
             height: 54px;
             padding-left: 22px;

@@ -1,6 +1,0 @@
-<resources>
-    <style name="Theme.Elearnin" parent="Theme.Elearnin.Base">
-        <!-- Let Android fit the NativeActivity surface inside the system bars. -->
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
-    </style>
-</resources>
