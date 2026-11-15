@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application android:label="Elearnin’" android:icon="@drawable/elearnin"
-        android:theme="@android:style/Theme.Material.NoActionBar"
+        android:theme="@style/Theme.Elearnin"
         android:allowBackup="false" android:usesCleartextTraffic="false">
         <activity android:name=".StudyActivity" android:exported="true"
             android:configChanges="orientation|keyboardHidden|screenSize|screenLayout|density"

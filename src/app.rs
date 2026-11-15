@@ -32,6 +32,13 @@ struct View {
 
 pub fn run(root: PathBuf) -> Result<()> {
     let ui = AppWindow::new()?;
+    #[cfg(target_os = "android")]
+    ui.set_version(
+        option_env!("ELEARNIN_ANDROID_VERSION")
+            .unwrap_or(env!("CARGO_PKG_VERSION"))
+            .into(),
+    );
+    #[cfg(not(target_os = "android"))]
     ui.set_version(env!("CARGO_PKG_VERSION").into());
     ui.set_mobile(cfg!(target_os = "android"));
     let library = match Library::open(&root) {
